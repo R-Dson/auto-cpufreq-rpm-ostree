@@ -2,9 +2,7 @@
 
 Installs and configures `auto-cpufreq` as a system daemon on immutable/atomic systems (Project Bluefin, Fedora Silverblue, Kinoite, Bazzite, Aurora) without modifying the read-only `/usr` tree or layering packages.
 
---
-
-### Prerequisites
+## Prerequisites
 
 * **Host packages** (installed by default on Bluefin and Fedora Silverblue):
   * `git`
@@ -17,7 +15,7 @@ Installs and configures `auto-cpufreq` as a system daemon on immutable/atomic sy
 
 ---
 
-### Installation
+## Installation
 
 1. Save the management script:
 ```bash
@@ -31,7 +29,7 @@ Installs and configures `auto-cpufreq` as a system daemon on immutable/atomic sy
 
 ---
 
-### Monitoring & Configuration
+## Monitoring & Configuration
 
 * **Live monitoring & stats:**
 ```bash
@@ -43,7 +41,7 @@ Create or modify `/etc/auto-cpufreq.conf` (applied automatically by the daemon).
 
 ---
 
-### Uninstallation
+## Uninstallation
 
 Removes all binaries, virtual environments, scripts, and unmasks/restores the native power management daemon (`tuned` or `power-profiles-daemon`):
 
