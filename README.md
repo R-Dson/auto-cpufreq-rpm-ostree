@@ -15,17 +15,21 @@ Installs and configures [`auto-cpufreq`](https://github.com/AdnanHodzic/auto-cpu
 
 ## Installation
 
-1. Make the installer runnable:
+1. Clone repo and cd
+```
+git clone https://github.com/R-Dson/auto-cpufreq-rpm-ostree.git
+cd auto-cpufreq-rpm-ostree
+```
+2. Make the installer runnable:
 ```bash
 chmod +x auto-cpufreq-ostree.sh
 ```
 
-2. Run the installer (defaults to install/update):
+3. Run the installer (defaults to install/update):
 ```bash
 sudo ./auto-cpufreq-ostree.sh
 ```
-
-3. Check Live monitoring & stats
+4. Check Live monitoring & stats
 ```bash
 auto-cpufreq --stats
 ```
