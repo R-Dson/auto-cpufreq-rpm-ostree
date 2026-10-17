@@ -44,6 +44,29 @@ install_auto_cpufreq() {
     /opt/auto-cpufreq/venv/bin/auto-cpufreq --install
     restorecon -Rv /usr/local/bin &>/dev/null || true
     chcon -R -t bin_t /opt/auto-cpufreq/venv/bin
+
+    # Interactive configuration prompt
+    read -r -p "Write recommended power profile settings to /etc/auto-cpufreq.conf? [Y/n] " reply || reply=""
+    reply="${reply:-y}"
+    if [[ ! "$reply" =~ ^[Nn] ]]; then
+        cat << 'EOF' > /etc/auto-cpufreq.conf
+[charger]
+governor = performance
+energy_performance_preference = performance
+platform_profile = performance
+turbo = auto
+
+[battery]
+governor = powersave
+energy_performance_preference = balance_power
+platform_profile = low-power
+turbo = never
+EOF
+        echo "Configuration written to /etc/auto-cpufreq.conf."
+    else
+        echo "Skipping configuration file creation."
+    fi
+
     systemctl restart auto-cpufreq
 
     if systemctl is-active --quiet auto-cpufreq; then
@@ -115,4 +138,3 @@ case "${1:-install}" in
         exit 1
         ;;
 esac
-
