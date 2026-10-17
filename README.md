@@ -15,7 +15,7 @@ Installs and configures [`auto-cpufreq`](https://github.com/AdnanHodzic/auto-cpu
 
 ## Installation
 
-1. Save the management script:
+1. Make the installer runnable:
 ```bash
 chmod +x auto-cpufreq-ostree.sh
 ```
