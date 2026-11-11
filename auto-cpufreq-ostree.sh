@@ -18,32 +18,44 @@ install_auto_cpufreq() {
     systemctl stop auto-cpufreq power-profiles-daemon tuned 2>/dev/null || true
     systemctl mask power-profiles-daemon tuned 2>/dev/null || true
 
-    echo "[2/6] Preparing paths in /opt and /usr/local..."
-    mkdir -p /opt/auto-cpufreq /usr/local/bin /usr/local/share/auto-cpufreq/scripts
-    ln -sfn /opt/auto-cpufreq /opt/auto-cpufreq/current
-    python3 -m venv /opt/auto-cpufreq/venv
+    echo "[2/6] Preparing paths in /var/opt and /usr/local..."
+    mkdir -p /var/opt/auto-cpufreq /usr/local/bin /usr/local/share/auto-cpufreq/scripts
+    ln -sfn /var/opt/auto-cpufreq /var/opt/auto-cpufreq/current
+    python3 -m venv /var/opt/auto-cpufreq/venv
 
     TMPDIR=$(mktemp -d /tmp/auto-cpufreq-XXXXXX)
     trap 'rm -rf "$TMPDIR"' RETURN
 
     echo "[3/6] Fetching repository and installing dependencies..."
     git clone https://github.com/AdnanHodzic/auto-cpufreq.git "$TMPDIR"
-    /opt/auto-cpufreq/venv/bin/pip install --upgrade pip wheel setuptools
-    /opt/auto-cpufreq/venv/bin/pip install "$TMPDIR"
+    /var/opt/auto-cpufreq/venv/bin/python -m pip install --upgrade pip wheel setuptools
+    /var/opt/auto-cpufreq/venv/bin/python -m pip install --force-reinstall "$TMPDIR"
 
     echo "[4/6] Installing helper scripts and CLI symlink..."
+    # Keep an existing wrapper-managed unit in sync with the adapted template.
+    local managed_unit=false
+    if cmp -s /usr/local/share/auto-cpufreq/scripts/auto-cpufreq.service \
+              /etc/systemd/system/auto-cpufreq.service; then
+        managed_unit=true
+    fi
     cp -r "$TMPDIR"/scripts/* /usr/local/share/auto-cpufreq/scripts/
+    sed -i 's|/opt/auto-cpufreq|/var/opt/auto-cpufreq|g' \
+        /usr/local/share/auto-cpufreq/scripts/auto-cpufreq.service
+    if "$managed_unit"; then
+        cp /usr/local/share/auto-cpufreq/scripts/auto-cpufreq.service \
+           /etc/systemd/system/auto-cpufreq.service
+    fi
     chmod +x /usr/local/share/auto-cpufreq/scripts/*
-    ln -sf /opt/auto-cpufreq/venv/bin/auto-cpufreq /usr/local/bin/auto-cpufreq
+    ln -sf /var/opt/auto-cpufreq/venv/bin/auto-cpufreq /usr/local/bin/auto-cpufreq
 
     echo "[5/6] Setting SELinux contexts..."
-    chcon -R -t bin_t /opt/auto-cpufreq/venv/bin
+    chcon -R -t bin_t /var/opt/auto-cpufreq/venv/bin
     restorecon -Rv /usr/local &>/dev/null || true
 
     echo "[6/6] Installing and starting systemd service..."
-    /opt/auto-cpufreq/venv/bin/auto-cpufreq --install
+    /var/opt/auto-cpufreq/venv/bin/auto-cpufreq --install
     restorecon -Rv /usr/local/bin &>/dev/null || true
-    chcon -R -t bin_t /opt/auto-cpufreq/venv/bin
+    chcon -R -t bin_t /var/opt/auto-cpufreq/venv/bin
     systemctl restart auto-cpufreq
 
     if systemctl is-active --quiet auto-cpufreq; then
@@ -66,7 +78,7 @@ remove_auto_cpufreq() {
     systemctl reset-failed auto-cpufreq 2>/dev/null || true
 
     echo "[2/4] Removing files, directories, and symlinks..."
-    rm -rf /opt/auto-cpufreq \
+    rm -rf /var/opt/auto-cpufreq \
            /usr/local/share/auto-cpufreq \
            /var/log/auto-cpufreq.log
     rm -f /usr/local/bin/auto-cpufreq \
