@@ -57,24 +57,27 @@ install_auto_cpufreq() {
     restorecon -Rv /usr/local/bin &>/dev/null || true
     chcon -R -t bin_t /var/opt/auto-cpufreq/venv/bin
 
-
     # Interactive configuration prompt
     read -r -p "Write recommended power profile settings to /etc/auto-cpufreq.conf? [Y/n] " reply || reply=""
     reply="${reply:-y}"
     if [[ ! "$reply" =~ ^[Nn] ]]; then
-        cat << 'EOF' > /etc/auto-cpufreq.conf
-[charger]
-governor = performance
-energy_performance_preference = performance
-platform_profile = performance
-turbo = auto
+        local config_source=""
+        if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+            config_source="$(dirname -- "${BASH_SOURCE[0]}")/auto-cpufreq.conf"
+        fi
+        if [[ ! -f "$config_source" ]]; then
+            config_source="$TMPDIR/auto-cpufreq.conf"
+            python3 - "$config_source" <<'PYTHON'
+import sys
+from urllib.request import urlretrieve
 
-[battery]
-governor = powersave
-energy_performance_preference = balance_power
-platform_profile = low-power
-turbo = never
-EOF
+urlretrieve(
+    "https://raw.githubusercontent.com/R-Dson/auto-cpufreq-rpm-ostree/refs/heads/main-oma/auto-cpufreq.conf",
+    sys.argv[1],
+)
+PYTHON
+        fi
+        install -m 644 "$config_source" /etc/auto-cpufreq.conf
         echo "Configuration written to /etc/auto-cpufreq.conf."
     else
         echo "Skipping configuration file creation."
