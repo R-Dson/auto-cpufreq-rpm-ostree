@@ -15,17 +15,28 @@ Installs and configures [`auto-cpufreq`](https://github.com/AdnanHodzic/auto-cpu
 
 ## Installation
 
-1. Save the management script:
+### Run the script directly
+```bash
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/R-Dson/auto-cpufreq-rpm-ostree/refs/heads/main-oma/auto-cpufreq-ostree.sh)"
+```
+
+### Clone and run (Optional) 
+1. Clone repo and cd
+```bash
+git clone https://github.com/R-Dson/auto-cpufreq-rpm-ostree.git
+cd auto-cpufreq-rpm-ostree
+```
+2. Make the installer runnable:
 ```bash
 chmod +x auto-cpufreq-ostree.sh
 ```
 
-2. Run the installer (defaults to install/update):
+3. Run the installer (defaults to install/update):
 ```bash
 sudo ./auto-cpufreq-ostree.sh
 ```
 
-3. Check Live monitoring & stats
+### Check Live monitoring & stats
 ```bash
 auto-cpufreq --stats
 ```
@@ -36,6 +47,11 @@ auto-cpufreq --stats
 
 Removes all binaries, virtual environments, scripts, and unmasks/restores the native power management daemon (`tuned` or `power-profiles-daemon`):
 
+```bash
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/R-Dson/auto-cpufreq-rpm-ostree/refs/heads/main-oma/auto-cpufreq-ostree.sh)" _ --remove
+```
+
+Alternative after cloning: 
 ```bash
 sudo ./auto-cpufreq-ostree.sh --remove
 ```
